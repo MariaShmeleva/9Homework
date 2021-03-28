@@ -47,7 +47,7 @@ public class MyCollection<E> implements Collection<E> {
     public boolean contains(Object o) {
         boolean b;
         for (int i = 0; i < size; i++) {
-            b = elementData[i].equals(o);
+            b = (elementData[i] != null && elementData[i].equals(o)) || (elementData[i] == null && o == null);
             if (b) {
                 return true;
             }
@@ -87,7 +87,7 @@ public class MyCollection<E> implements Collection<E> {
     public boolean remove(Object o) {
         boolean b = false;
         for (int i = 0; i < size; i++) {
-            b = elementData[i].equals(o);
+            b = (elementData[i] != null && elementData[i].equals(o)) || (elementData[i] == null && o == null);
             if (b) {
                 for (int j = i; j <= size; j++) {
                     if (j == size) {
@@ -105,14 +105,15 @@ public class MyCollection<E> implements Collection<E> {
 
     @Override
     public boolean removeAll(Collection<?> c) {
-        boolean boo;
         boolean isRemove = false;
         for (Object ob : c) {
-            boo = remove(ob);
-            if (boo) {
-                isRemove = true;
+            boolean boo = true;
+            while (boo) {
+                boo = remove(ob);
+                if (boo) {
+                    isRemove = true;
+                }
             }
-
         }
         return isRemove;
     }
@@ -122,7 +123,7 @@ public class MyCollection<E> implements Collection<E> {
         boolean b = false;
         for (int i = 0; i < size; i++) {
             if (!c.contains(elementData[i])) {
-                remove(elementData[i]);
+                remove(elementData[i--]);
                 b = true;
             }
         }
@@ -140,7 +141,7 @@ public class MyCollection<E> implements Collection<E> {
     private class MyIterator<T> implements Iterator<T> {
 
         int cursor = 0;
-        boolean isRemoveWasCalled;
+        boolean isRemoveWasCalled = true;
 
         @Override
         public boolean hasNext() {
@@ -161,7 +162,7 @@ public class MyCollection<E> implements Collection<E> {
         @Override
         public void remove() {
             if (isRemoveWasCalled) {
-                throw new UnsupportedOperationException("remove");
+                throw new IllegalStateException("remove");
             } else {
                 for (int i = cursor - 1; i <= size; i++) {
                     if (i == size) {
